@@ -5,9 +5,29 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import Tube from "./Tube";
 
+const STORAGE_KEY = "water-sort-progress";
+
+interface Progress {
+  currentLevel: number;
+  stars: Record<number, number>; // level -> best stars
+}
+
+function loadProgress(): Progress {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { currentLevel: 1, stars: {} };
+}
+
+function saveProgress(p: Progress) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+
 export default function WaterSortGame() {
-  const [level, setLevel] = useState(1);
-  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(1));
+  const [progress, setProgress] = useState<Progress>(loadProgress);
+  const [level, setLevel] = useState(() => loadProgress().currentLevel);
+  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(loadProgress().currentLevel));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
@@ -21,14 +41,26 @@ export default function WaterSortGame() {
     setHistory([]);
     setWon(false);
     setMoves(0);
+    setProgress((prev) => {
+      const next = { ...prev, currentLevel: lvl };
+      saveProgress(next);
+      return next;
+    });
   }, []);
 
   useEffect(() => {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
       setWon(true);
       playWin();
+      const earned = getStars(level, moves);
+      setProgress((prev) => {
+        const best = Math.max(prev.stars[level] || 0, earned);
+        const next = { ...prev, stars: { ...prev.stars, [level]: best } };
+        saveProgress(next);
+        return next;
+      });
     }
-  }, [tubes, won]);
+  }, [tubes, won, level, moves]);
 
   const handleTubeClick = (idx: number) => {
     if (won) return;
@@ -64,6 +96,7 @@ export default function WaterSortGame() {
     setMoves((m) => m - 1);
     setSelectedIdx(null);
   };
+  const totalStars = Object.values(progress.stars).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen game-gradient-bg flex flex-col items-center justify-between p-4 select-none overflow-hidden">
@@ -71,7 +104,9 @@ export default function WaterSortGame() {
       <div className="w-full max-w-lg flex items-center justify-between pt-2 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Water Sort</h1>
-          <p className="text-sm text-muted-foreground">Level {level} · {moves} moves</p>
+          <p className="text-sm text-muted-foreground">
+            Level {level} · {moves} moves · <Star size={12} className="inline text-accent fill-accent mb-0.5" /> {totalStars}
+          </p>
         </div>
         <div className="flex gap-2">
           <button
