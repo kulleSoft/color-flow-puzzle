@@ -52,8 +52,15 @@ export default function WaterSortGame() {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
       setWon(true);
       playWin();
+      const earned = getStars(level, moves);
+      setProgress((prev) => {
+        const best = Math.max(prev.stars[level] || 0, earned);
+        const next = { ...prev, stars: { ...prev.stars, [level]: best } };
+        saveProgress(next);
+        return next;
+      });
     }
-  }, [tubes, won]);
+  }, [tubes, won, level, moves]);
 
   const handleTubeClick = (idx: number) => {
     if (won) return;
