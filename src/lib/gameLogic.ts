@@ -83,3 +83,12 @@ export function isComplete(tubes: Tube[]): boolean {
 export function isTubeSorted(tube: Tube): boolean {
   return tube.length === TUBE_CAPACITY && tube.every((c) => c === tube[0]);
 }
+
+/** Returns 1-3 stars based on moves relative to the optimal (numColors) */
+export function getStars(level: number, moves: number): number {
+  const numColors = Math.min(3 + Math.floor(level / 2), 12);
+  const optimal = numColors; // theoretical minimum ~1 pour per color
+  if (moves <= optimal) return 3;
+  if (moves <= optimal * 2) return 2;
+  return 1;
+}
