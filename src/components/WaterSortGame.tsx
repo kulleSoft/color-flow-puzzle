@@ -5,9 +5,29 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import Tube from "./Tube";
 
+const STORAGE_KEY = "water-sort-progress";
+
+interface Progress {
+  currentLevel: number;
+  stars: Record<number, number>; // level -> best stars
+}
+
+function loadProgress(): Progress {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { currentLevel: 1, stars: {} };
+}
+
+function saveProgress(p: Progress) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+
 export default function WaterSortGame() {
-  const [level, setLevel] = useState(1);
-  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(1));
+  const [progress, setProgress] = useState<Progress>(loadProgress);
+  const [level, setLevel] = useState(() => loadProgress().currentLevel);
+  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(loadProgress().currentLevel));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
@@ -21,6 +41,11 @@ export default function WaterSortGame() {
     setHistory([]);
     setWon(false);
     setMoves(0);
+    setProgress((prev) => {
+      const next = { ...prev, currentLevel: lvl };
+      saveProgress(next);
+      return next;
+    });
   }, []);
 
   useEffect(() => {
