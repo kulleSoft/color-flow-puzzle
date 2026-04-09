@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Undo2, SkipForward, Trophy } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, type Tube as TubeType } from "@/lib/gameLogic";
+import { playPour, playSelect, playWin } from "@/lib/sounds";
 import Tube from "./Tube";
 
 export default function WaterSortGame() {
