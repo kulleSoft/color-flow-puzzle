@@ -12,6 +12,7 @@ export default function WaterSortGame() {
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
   const [moves, setMoves] = useState(0);
+  const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
