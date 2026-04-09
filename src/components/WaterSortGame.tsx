@@ -1,33 +1,22 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Undo2, SkipForward, Trophy, Star } from "lucide-react";
+import { RotateCcw, Undo2, SkipForward, Trophy, Star, Home } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
+import { saveProgress, getTotalStars, type Progress } from "@/lib/progress";
 import Tube from "./Tube";
 
-const STORAGE_KEY = "water-sort-progress";
-
-interface Progress {
-  currentLevel: number;
-  stars: Record<number, number>; // level -> best stars
+interface WaterSortGameProps {
+  initialLevel: number;
+  progress: Progress;
+  soundEnabled: boolean;
+  onUpdateProgress: (p: Progress) => void;
+  onBackToMenu: () => void;
 }
 
-function loadProgress(): Progress {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { currentLevel: 1, stars: {} };
-}
-
-function saveProgress(p: Progress) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-}
-
-export default function WaterSortGame() {
-  const [progress, setProgress] = useState<Progress>(loadProgress);
-  const [level, setLevel] = useState(() => loadProgress().currentLevel);
-  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(loadProgress().currentLevel));
+export default function WaterSortGame({ initialLevel, progress, soundEnabled, onUpdateProgress, onBackToMenu }: WaterSortGameProps) {
+  const [level, setLevel] = useState(initialLevel);
+  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(initialLevel));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
@@ -41,34 +30,29 @@ export default function WaterSortGame() {
     setHistory([]);
     setWon(false);
     setMoves(0);
-    setProgress((prev) => {
-      const next = { ...prev, currentLevel: lvl };
-      saveProgress(next);
-      return next;
-    });
-  }, []);
+    const next = { ...progress, currentLevel: lvl };
+    saveProgress(next);
+    onUpdateProgress(next);
+  }, [progress, onUpdateProgress]);
 
   useEffect(() => {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
       setWon(true);
-      playWin();
+      if (soundEnabled) playWin();
       const earned = getStars(level, moves);
-      setProgress((prev) => {
-        const best = Math.max(prev.stars[level] || 0, earned);
-        const next = { ...prev, stars: { ...prev.stars, [level]: best } };
-        saveProgress(next);
-        return next;
-      });
+      const best = Math.max(progress.stars[level] || 0, earned);
+      const next = { ...progress, stars: { ...progress.stars, [level]: best } };
+      saveProgress(next);
+      onUpdateProgress(next);
     }
-  }, [tubes, won, level, moves]);
+  }, [tubes, won, level, moves, soundEnabled, progress, onUpdateProgress]);
 
   const handleTubeClick = (idx: number) => {
     if (won) return;
-
     if (selectedIdx === null) {
       if (tubes[idx].length > 0) {
         setSelectedIdx(idx);
-        playSelect();
+        if (soundEnabled) playSelect();
       }
     } else if (selectedIdx === idx) {
       setSelectedIdx(null);
@@ -82,7 +66,7 @@ export default function WaterSortGame() {
         setTubes(newTubes);
         setMoves((m) => m + 1);
         setBubblingIdx(idx);
-        playPour();
+        if (soundEnabled) playPour();
         setTimeout(() => setBubblingIdx(null), 500);
       }
       setSelectedIdx(null);
@@ -96,17 +80,26 @@ export default function WaterSortGame() {
     setMoves((m) => m - 1);
     setSelectedIdx(null);
   };
-  const totalStars = Object.values(progress.stars).reduce((a, b) => a + b, 0);
+
+  const totalStars = getTotalStars(progress.stars);
 
   return (
     <div className="min-h-screen game-gradient-bg flex flex-col items-center justify-between p-4 select-none overflow-hidden">
       {/* Header */}
       <div className="w-full max-w-lg flex items-center justify-between pt-2 pb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Water Sort</h1>
-          <p className="text-sm text-muted-foreground">
-            Level {level} · {moves} moves · <Star size={12} className="inline text-accent fill-accent mb-0.5" /> {totalStars}
-          </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToMenu}
+            className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+          >
+            <Home size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Level {level}</h1>
+            <p className="text-sm text-muted-foreground">
+              {moves} moves · <Star size={12} className="inline text-accent fill-accent mb-0.5" /> {totalStars}
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button
@@ -181,18 +174,25 @@ export default function WaterSortGame() {
                 ))}
               </div>
               <p className="text-muted-foreground mb-6">{moves} moves</p>
-              <button
-                onClick={() => startLevel(level + 1)}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-lg hover:brightness-110 transition-all"
-              >
-                Next Level
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={onBackToMenu}
+                  className="flex-1 py-3 rounded-xl bg-muted text-muted-foreground font-semibold hover:text-foreground transition-all"
+                >
+                  Menu
+                </button>
+                <button
+                  onClick={() => startLevel(level + 1)}
+                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-lg hover:brightness-110 transition-all"
+                >
+                  Próximo
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Footer spacer */}
       <div className="h-8" />
     </div>
   );
