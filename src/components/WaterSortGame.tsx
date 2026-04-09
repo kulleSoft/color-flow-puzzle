@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Undo2, SkipForward, Trophy } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, type Tube as TubeType } from "@/lib/gameLogic";
+import { playPour, playSelect, playWin } from "@/lib/sounds";
 import Tube from "./Tube";
 
 export default function WaterSortGame() {
@@ -11,6 +12,7 @@ export default function WaterSortGame() {
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
   const [moves, setMoves] = useState(0);
+  const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
@@ -24,6 +26,7 @@ export default function WaterSortGame() {
   useEffect(() => {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
       setWon(true);
+      playWin();
     }
   }, [tubes, won]);
 
@@ -31,7 +34,10 @@ export default function WaterSortGame() {
     if (won) return;
 
     if (selectedIdx === null) {
-      if (tubes[idx].length > 0) setSelectedIdx(idx);
+      if (tubes[idx].length > 0) {
+        setSelectedIdx(idx);
+        playSelect();
+      }
     } else if (selectedIdx === idx) {
       setSelectedIdx(null);
     } else {
@@ -43,6 +49,9 @@ export default function WaterSortGame() {
         newTubes[idx] = newTo;
         setTubes(newTubes);
         setMoves((m) => m + 1);
+        setBubblingIdx(idx);
+        playPour();
+        setTimeout(() => setBubblingIdx(null), 500);
       }
       setSelectedIdx(null);
     }
@@ -95,6 +104,7 @@ export default function WaterSortGame() {
               key={i}
               tube={tube}
               selected={selectedIdx === i}
+              bubbling={bubblingIdx === i}
               onClick={() => handleTubeClick(i)}
             />
           ))}

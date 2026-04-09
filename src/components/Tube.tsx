@@ -1,14 +1,17 @@
 import { motion } from "framer-motion";
 import { TUBE_CAPACITY, isTubeSorted, type Tube as TubeType } from "@/lib/gameLogic";
+import Bubbles from "./Bubbles";
 
 interface TubeProps {
   tube: TubeType;
   selected: boolean;
+  bubbling: boolean;
   onClick: () => void;
 }
 
-export default function Tube({ tube, selected, onClick }: TubeProps) {
+export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
   const sorted = isTubeSorted(tube);
+  const topColor = tube.length > 0 ? tube[tube.length - 1] : "#fff";
 
   return (
     <motion.button
@@ -37,6 +40,7 @@ export default function Tube({ tube, selected, onClick }: TubeProps) {
             }}
           />
         ))}
+        <Bubbles color={topColor} active={bubbling} />
         {/* Glass shine */}
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 30%, transparent 70%)"
