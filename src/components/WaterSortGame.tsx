@@ -96,6 +96,7 @@ export default function WaterSortGame() {
     setMoves((m) => m - 1);
     setSelectedIdx(null);
   };
+  const totalStars = Object.values(progress.stars).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen game-gradient-bg flex flex-col items-center justify-between p-4 select-none overflow-hidden">
@@ -103,7 +104,9 @@ export default function WaterSortGame() {
       <div className="w-full max-w-lg flex items-center justify-between pt-2 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Water Sort</h1>
-          <p className="text-sm text-muted-foreground">Level {level} · {moves} moves</p>
+          <p className="text-sm text-muted-foreground">
+            Level {level} · {moves} moves · <Star size={12} className="inline text-accent fill-accent mb-0.5" /> {totalStars}
+          </p>
         </div>
         <div className="flex gap-2">
           <button
