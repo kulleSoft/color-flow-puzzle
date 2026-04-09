@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Undo2, SkipForward, Trophy } from "lucide-react";
-import { generateLevel, canPour, pour, isComplete, type Tube as TubeType } from "@/lib/gameLogic";
+import { RotateCcw, Undo2, SkipForward, Trophy, Star } from "lucide-react";
+import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import Tube from "./Tube";
 
@@ -129,7 +129,22 @@ export default function WaterSortGame() {
               <div className="w-16 h-16 rounded-full bg-[hsl(var(--game-success))]/20 flex items-center justify-center mx-auto mb-4">
                 <Trophy className="text-[hsl(var(--game-success))]" size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-1">Level Complete!</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Level Complete!</h2>
+              <div className="flex justify-center gap-1 mb-1">
+                {[1, 2, 3].map((s) => (
+                  <motion.div
+                    key={s}
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2 + s * 0.15, type: "spring", stiffness: 400 }}
+                  >
+                    <Star
+                      size={28}
+                      className={s <= getStars(level, moves) ? "text-accent fill-accent" : "text-muted-foreground/30"}
+                    />
+                  </motion.div>
+                ))}
+              </div>
               <p className="text-muted-foreground mb-6">{moves} moves</p>
               <button
                 onClick={() => startLevel(level + 1)}
