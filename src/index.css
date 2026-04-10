@@ -66,6 +66,11 @@
   }
 }
 
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
 @layer utilities {
   .game-gradient-bg {
     background: linear-gradient(
