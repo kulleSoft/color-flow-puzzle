@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Undo2, SkipForward, Trophy, Star, Home } from "lucide-react";
+import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
-import { saveProgress, getTotalStars, type Progress } from "@/lib/progress";
+import { saveProgress, type Progress } from "@/lib/progress";
 import Tube from "./Tube";
 
 interface WaterSortGameProps {
@@ -81,52 +81,85 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     setSelectedIdx(null);
   };
 
-  const totalStars = getTotalStars(progress.stars);
+  const addExtraTube = () => {
+    setHistory((h) => [...h, tubes.map((t) => [...t])]);
+    setTubes((t) => [...t, []]);
+  };
+
+  const currentStars = getStars(level, moves);
 
   return (
-    <div className="min-h-screen game-gradient-bg flex flex-col items-center justify-between p-4 select-none overflow-hidden">
+    <div className="min-h-screen neon-bg flex flex-col items-center p-4 select-none overflow-hidden relative">
+      {/* Decorative palm-like silhouettes */}
+      <div className="absolute inset-0 pointer-events-none opacity-30">
+        <div className="absolute bottom-0 left-0 w-1/3 h-2/3"
+          style={{ background: "radial-gradient(ellipse at bottom left, hsl(280 60% 10% / 0.8), transparent 60%)" }} />
+        <div className="absolute bottom-0 right-0 w-1/3 h-2/3"
+          style={{ background: "radial-gradient(ellipse at bottom right, hsl(280 60% 10% / 0.8), transparent 60%)" }} />
+      </div>
+
       {/* Header */}
-      <div className="w-full max-w-lg flex items-center justify-between pt-2 pb-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBackToMenu}
-            className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+      <div className="w-full max-w-lg flex items-start justify-between pt-2 pb-4 relative z-10">
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          onClick={onBackToMenu}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg"
+          style={{
+            background: "linear-gradient(135deg, hsl(var(--primary)), hsl(220 80% 45%))",
+            boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
+          }}
+        >
+          <Home size={22} />
+        </motion.button>
+
+        <div className="flex flex-col items-center gap-2">
+          <div
+            className="px-6 py-2 rounded-full border-2"
+            style={{
+              background: "hsl(260 50% 15% / 0.7)",
+              borderColor: "hsl(var(--primary) / 0.4)",
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.4), 0 0 16px hsl(var(--primary) / 0.2)",
+            }}
           >
-            <Home size={20} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Level {level}</h1>
-            <p className="text-sm text-muted-foreground">
-              {moves} moves · <Star size={12} className="inline text-accent fill-accent mb-0.5" /> {totalStars}
-            </p>
+            <span className="font-bold text-foreground tracking-wider">NÍVEL {level}</span>
+          </div>
+
+          {/* Stars bar */}
+          <div
+            className="flex items-center gap-2 px-3 py-1 rounded-full border"
+            style={{
+              background: "hsl(260 50% 15% / 0.6)",
+              borderColor: "hsl(var(--accent) / 0.3)",
+            }}
+          >
+            {[1, 2, 3].map((s) => (
+              <Star
+                key={s}
+                size={16}
+                className={s <= currentStars ? "text-accent fill-accent" : "text-muted-foreground/40"}
+              />
+            ))}
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={undo}
-            disabled={history.length === 0}
-            className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-all"
-          >
-            <Undo2 size={20} />
-          </button>
-          <button
+
+        <div className="flex flex-col gap-2">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
             onClick={() => startLevel(level)}
-            className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg relative"
+            style={{
+              background: "linear-gradient(135deg, hsl(200 80% 55%), hsl(220 80% 45%))",
+              boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
+            }}
           >
             <RotateCcw size={20} />
-          </button>
-          <button
-            onClick={() => startLevel(level + 1)}
-            className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
-          >
-            <SkipForward size={20} />
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Game Area */}
-      <div className="flex-1 flex items-center justify-center w-full max-w-2xl">
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+      <div className="flex-1 flex items-center justify-center w-full max-w-2xl relative z-10">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 px-2">
           {tubes.map((tube, i) => (
             <Tube
               key={i}
@@ -137,6 +170,21 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
             />
           ))}
         </div>
+      </div>
+
+      {/* Floor reflection */}
+      <div className="absolute bottom-24 left-0 right-0 h-32 neon-floor pointer-events-none" />
+
+      {/* Bottom action buttons */}
+      <div className="w-full max-w-lg flex items-center justify-around pb-4 pt-4 relative z-10">
+        <ActionButton icon={<Plus size={26} />} label="Tubo extra" onClick={addExtraTube} />
+        <ActionButton icon={<Lightbulb size={26} />} label="Dica" onClick={() => {}} />
+        <ActionButton
+          icon={<Undo2 size={26} />}
+          label="Desfazer"
+          onClick={undo}
+          disabled={history.length === 0}
+        />
       </div>
 
       {/* Win Overlay */}
@@ -157,7 +205,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
               <div className="w-16 h-16 rounded-full bg-[hsl(var(--game-success))]/20 flex items-center justify-center mx-auto mb-4">
                 <Trophy className="text-[hsl(var(--game-success))]" size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Level Complete!</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Nível Completo!</h2>
               <div className="flex justify-center gap-1 mb-1">
                 {[1, 2, 3].map((s) => (
                   <motion.div
@@ -173,7 +221,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
                   </motion.div>
                 ))}
               </div>
-              <p className="text-muted-foreground mb-6">{moves} moves</p>
+              <p className="text-muted-foreground mb-6">{moves} movimentos</p>
               <div className="flex gap-2">
                 <button
                   onClick={onBackToMenu}
@@ -192,8 +240,33 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
           </motion.div>
         )}
       </AnimatePresence>
-
-      <div className="h-8" />
     </div>
+  );
+}
+
+function ActionButton({
+  icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
+      onClick={onClick}
+      disabled={disabled}
+      className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+    >
+      <div className="circle-btn w-14 h-14 rounded-full flex items-center justify-center text-primary-foreground">
+        {icon}
+      </div>
+      <span className="text-xs font-semibold text-foreground/90">{label}</span>
+    </motion.button>
   );
 }
