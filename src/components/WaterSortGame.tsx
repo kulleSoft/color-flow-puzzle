@@ -111,7 +111,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={onBackToMenu}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
           style={{
             background: "linear-gradient(135deg, hsl(var(--primary)), hsl(220 80% 45%))",
             boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
@@ -154,7 +154,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={() => startLevel(level)}
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg relative"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg relative"
             style={{
               background: "linear-gradient(135deg, hsl(200 80% 55%), hsl(220 80% 45%))",
               boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
@@ -269,7 +269,7 @@ function ActionButton({
       disabled={disabled}
       className="flex flex-col items-center gap-1.5 disabled:opacity-40"
     >
-      <div className="circle-btn w-14 h-14 rounded-full flex items-center justify-center text-primary-foreground">
+      <div className="circle-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
         {icon}
       </div>
       <span className="text-xs font-semibold text-foreground/90">{label}</span>
