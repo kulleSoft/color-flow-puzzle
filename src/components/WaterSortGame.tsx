@@ -5,6 +5,7 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import Tube from "./Tube";
+import gameBg from "@/assets/game-bg.png";
 
 interface WaterSortGameProps {
   initialLevel: number;
