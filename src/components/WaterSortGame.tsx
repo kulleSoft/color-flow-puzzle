@@ -180,8 +180,6 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
         </div>
       </div>
 
-      {/* Floor reflection */}
-      <div className="absolute bottom-24 left-0 right-0 h-32 neon-floor pointer-events-none" />
 
       {/* Bottom action buttons */}
       <div className="w-full max-w-lg flex items-center justify-around pb-4 pt-4 relative z-10">
