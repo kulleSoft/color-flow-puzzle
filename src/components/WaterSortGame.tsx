@@ -111,58 +111,41 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={onBackToMenu}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
-          style={{
-            background: "linear-gradient(135deg, hsl(var(--primary)), hsl(220 80% 45%))",
-            boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
-          }}
+          className="neon-icon-btn w-12 h-12 rounded-2xl flex items-center justify-center text-[hsl(190_100%_70%)]"
         >
-          <Home size={22} />
+          <Home size={22} strokeWidth={2.5} />
         </motion.button>
 
         <div className="flex flex-col items-center gap-2">
-          <div
-            className="px-6 py-2 rounded-full border-2"
-            style={{
-              background: "hsl(260 50% 15% / 0.7)",
-              borderColor: "hsl(var(--primary) / 0.4)",
-              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.4), 0 0 16px hsl(var(--primary) / 0.2)",
-            }}
-          >
-            <span className="font-bold text-foreground tracking-wider">NÍVEL {level}</span>
+          <div className="level-plaque px-8 py-2 relative">
+            <span className="font-extrabold text-white tracking-widest text-lg drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
+              NÍVEL {level}
+            </span>
           </div>
 
           {/* Stars bar */}
-          <div
-            className="flex items-center gap-2 px-3 py-1 rounded-full border"
-            style={{
-              background: "hsl(260 50% 15% / 0.6)",
-              borderColor: "hsl(var(--accent) / 0.3)",
-            }}
-          >
+          <div className="stars-plaque flex items-center gap-2 px-4 py-1">
             {[1, 2, 3].map((s) => (
               <Star
                 key={s}
-                size={16}
-                className={s <= currentStars ? "text-accent fill-accent" : "text-muted-foreground/40"}
+                size={18}
+                className={
+                  s <= currentStars
+                    ? "text-[hsl(45_100%_60%)] fill-[hsl(45_100%_60%)] drop-shadow-[0_0_6px_rgba(255,200,0,0.8)]"
+                    : "text-white/20 fill-white/10"
+                }
               />
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            onClick={() => startLevel(level)}
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg relative"
-            style={{
-              background: "linear-gradient(135deg, hsl(200 80% 55%), hsl(220 80% 45%))",
-              boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 12px hsl(var(--primary) / 0.4)",
-            }}
-          >
-            <RotateCcw size={20} />
-          </motion.button>
-        </div>
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          onClick={() => startLevel(level)}
+          className="neon-icon-btn w-12 h-12 rounded-2xl flex items-center justify-center text-[hsl(190_100%_70%)]"
+        >
+          <RotateCcw size={20} strokeWidth={2.5} />
+        </motion.button>
       </div>
 
       {/* Game Area */}
@@ -183,11 +166,13 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
       {/* Bottom action buttons */}
       <div className="w-full max-w-lg flex items-center justify-around pb-4 pt-4 relative z-10">
-        <ActionButton icon={<Plus size={26} />} label="Tubo extra" onClick={addExtraTube} />
-        <ActionButton icon={<Lightbulb size={26} />} label="Dica" onClick={() => {}} />
+        <ActionButton icon={<Plus size={28} strokeWidth={3} />} label="TUBO EXTRA" badge={2} color="cyan" onClick={addExtraTube} />
+        <ActionButton icon={<Lightbulb size={28} strokeWidth={2.5} />} label="DICA" badge={1} color="yellow" onClick={() => {}} />
         <ActionButton
-          icon={<Undo2 size={26} />}
-          label="Desfazer"
+          icon={<Undo2 size={28} strokeWidth={3} />}
+          label="DESFAZER"
+          badge={2}
+          color="pink"
           onClick={undo}
           disabled={history.length === 0}
         />
@@ -253,14 +238,23 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 function ActionButton({
   icon,
   label,
+  badge,
+  color = "cyan",
   onClick,
   disabled,
 }: {
   icon: React.ReactNode;
   label: string;
+  badge?: number;
+  color?: "cyan" | "yellow" | "pink";
   onClick: () => void;
   disabled?: boolean;
 }) {
+  const colorMap = {
+    cyan: "text-[hsl(190_100%_70%)]",
+    yellow: "text-[hsl(45_100%_65%)]",
+    pink: "text-[hsl(320_100%_75%)]",
+  };
   return (
     <motion.button
       whileTap={{ scale: 0.9 }}
@@ -269,10 +263,15 @@ function ActionButton({
       disabled={disabled}
       className="flex flex-col items-center gap-1.5 disabled:opacity-40"
     >
-      <div className="circle-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
-        {icon}
+      <div className={`action-btn-frame w-16 h-16 flex items-center justify-center relative ${colorMap[color]}`}>
+        <span style={{ filter: "drop-shadow(0 0 6px currentColor)" }}>{icon}</span>
+        {badge !== undefined && (
+          <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gradient-to-b from-[hsl(260_60%_35%)] to-[hsl(260_70%_20%)] border-2 border-[hsl(45_80%_55%)] flex items-center justify-center text-white text-xs font-bold shadow-lg">
+            {badge}
+          </div>
+        )}
       </div>
-      <span className="text-xs font-semibold text-foreground/90">{label}</span>
+      <span className="text-[10px] font-bold text-white tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{label}</span>
     </motion.button>
   );
 }
