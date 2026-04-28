@@ -7,10 +7,11 @@ interface TubeProps {
   tube: TubeType;
   selected: boolean;
   bubbling: boolean;
+  accentHsl?: string;
   onClick: () => void;
 }
 
-export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
+export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 65%", onClick }: TubeProps) {
   const sorted = isTubeSorted(tube);
   const topColor = tube.length > 0 ? tube[tube.length - 1] : "#fff";
   const SEG_H = 30;
@@ -88,7 +89,7 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
             filter: sorted
               ? "drop-shadow(0 0 12px hsl(140 80% 55% / 0.7))"
               : selected
-                ? "drop-shadow(0 0 14px hsl(190 100% 65% / 0.85))"
+                ? `drop-shadow(0 0 14px hsl(${accentHsl} / 0.85))`
                 : "drop-shadow(0 6px 10px rgba(0,0,0,0.45))",
           }}
           draggable={false}

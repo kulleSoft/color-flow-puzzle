@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
+import { getActiveTheme } from "@/lib/themes";
 import Tube from "./Tube";
-import gameBg from "@/assets/game-bg.png";
 
 interface WaterSortGameProps {
   initialLevel: number;
@@ -16,8 +16,9 @@ interface WaterSortGameProps {
 }
 
 export default function WaterSortGame({ initialLevel, progress, soundEnabled, onUpdateProgress, onBackToMenu }: WaterSortGameProps) {
+  const theme = useMemo(() => getActiveTheme(), [initialLevel]);
   const [level, setLevel] = useState(initialLevel);
-  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(initialLevel));
+  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(initialLevel, theme.palette));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
@@ -26,7 +27,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
-    setTubes(generateLevel(lvl));
+    setTubes(generateLevel(lvl, theme.palette));
     setSelectedIdx(null);
     setHistory([]);
     setWon(false);
@@ -34,7 +35,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     const next = { ...progress, currentLevel: lvl };
     saveProgress(next);
     onUpdateProgress(next);
-  }, [progress, onUpdateProgress]);
+  }, [progress, onUpdateProgress, theme.palette]);
 
   useEffect(() => {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
@@ -93,9 +94,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     <div
       className="min-h-screen flex flex-col items-center p-4 select-none overflow-hidden relative"
       style={{
-        backgroundImage: `linear-gradient(180deg, hsl(260 50% 12% / 0.55) 0%, hsl(280 55% 18% / 0.65) 60%, hsl(320 50% 22% / 0.75) 100%), url(${gameBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        background: theme.background,
       }}
     >
       {/* Decorative palm-like silhouettes */}
@@ -157,6 +156,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
               tube={tube}
               selected={selectedIdx === i}
               bubbling={bubblingIdx === i}
+              accentHsl={theme.accentHsl}
               onClick={() => handleTubeClick(i)}
             />
           ))}
