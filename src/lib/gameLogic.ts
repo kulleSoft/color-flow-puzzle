@@ -1,27 +1,19 @@
 export type Color = string;
 export type Tube = Color[];
 
-const COLORS = [
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#22c55e', // green
-  '#eab308', // yellow
-  '#a855f7', // purple
-  '#f97316', // orange
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#8b5cf6', // violet
-  '#14b8a6', // teal
-  '#f43f5e', // rose
-  '#84cc16', // lime
+const DEFAULT_COLORS = [
+  '#ef4444', '#3b82f6', '#22c55e', '#eab308',
+  '#a855f7', '#f97316', '#ec4899', '#06b6d4',
+  '#8b5cf6', '#14b8a6', '#f43f5e', '#84cc16',
 ];
 
 export const TUBE_CAPACITY = 4;
 
-export function generateLevel(level: number): Tube[] {
+export function generateLevel(level: number, palette?: Color[]): Tube[] {
   const numColors = Math.min(3 + Math.floor(level / 2), 12);
   const numTubes = numColors + 2;
-  const colors = COLORS.slice(0, numColors);
+  const source = palette && palette.length >= numColors ? palette : DEFAULT_COLORS;
+  const colors = source.slice(0, numColors);
 
   // Create all segments
   const segments: Color[] = [];
