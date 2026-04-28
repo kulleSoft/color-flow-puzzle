@@ -50,7 +50,9 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
             bottom: `${INNER_BOTTOM_PCT}%`,
             left: `${INNER_LEFT_PCT}%`,
             right: `${INNER_RIGHT_PCT}%`,
-            borderRadius: "0 0 999px 999px / 0 0 80% 80%",
+            // Base elliptical curve: horizontal radius 50% of width, vertical radius ≈9.3% of container height
+            // (6% of image height / 64.5% container height). Top is straight (no radius).
+            borderRadius: "0 0 50% 50% / 0 0 9.3% 9.3%",
           }}
         >
           {tube.map((color, i) => (
