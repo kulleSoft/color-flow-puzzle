@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, LogOut } from "lucide-react";
 import { getTotalStars, type Progress } from "@/lib/progress";
 import { useState } from "react";
+import gameBg from "@/assets/game-bg.png";
 
 interface FloatingBubble {
   id: number;
@@ -44,7 +45,14 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
   const [bubbles] = useState(() => generateBubbles(12));
 
   return (
-    <div className="min-h-screen menu-neon-bg flex flex-col items-center justify-center p-4 select-none overflow-hidden relative">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-4 select-none overflow-hidden relative"
+      style={{
+        backgroundImage: `linear-gradient(180deg, hsl(260 50% 12% / 0.55) 0%, hsl(280 55% 18% / 0.65) 60%, hsl(320 50% 22% / 0.75) 100%), url(${gameBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       {/* Floating bubbles */}
       {bubbles.map((b) => (
         <motion.div
