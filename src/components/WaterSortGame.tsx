@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
+import { getActiveTheme } from "@/lib/themes";
 import Tube from "./Tube";
-import gameBg from "@/assets/game-bg.png";
 
 interface WaterSortGameProps {
   initialLevel: number;
