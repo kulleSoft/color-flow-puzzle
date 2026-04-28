@@ -86,6 +86,11 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
   const undo = () => {
     if (history.length === 0) return;
+    if (!consumeItem("undo")) {
+      toast.error("Sem desfazeres! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
     setTubes(history[history.length - 1]);
     setHistory((h) => h.slice(0, -1));
     setMoves((m) => m - 1);
@@ -93,8 +98,42 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   };
 
   const addExtraTube = () => {
+    if (!consumeItem("extraTube")) {
+      toast.error("Sem tubos extras! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
     setHistory((h) => [...h, tubes.map((t) => [...t])]);
     setTubes((t) => [...t, []]);
+  };
+
+  const useHint = () => {
+    if (!consumeItem("hint")) {
+      toast.error("Sem dicas! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
+    // Find a valid pour and highlight the source tube
+    for (let i = 0; i < tubes.length; i++) {
+      for (let j = 0; j < tubes.length; j++) {
+        if (i !== j && canPour(tubes[i], tubes[j])) {
+          setSelectedIdx(i);
+          toast.info(`💡 Tente mover do tubo ${i + 1} para o tubo ${j + 1}`);
+          return;
+        }
+      }
+    }
+    toast.warning("Nenhuma jogada disponível 😬");
+  };
+
+  const skipLevel = () => {
+    if (!consumeItem("skip")) {
+      toast.error("Sem pulos! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
+    toast.success("Nível pulado ⏭️");
+    startLevel(level + 1);
   };
 
   const currentStars = getStars(level, moves);
