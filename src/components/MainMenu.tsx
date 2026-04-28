@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, LogOut } from "lucide-react";
 import { getTotalStars, type Progress } from "@/lib/progress";
 import { useState } from "react";
+import { toast } from "sonner";
 import gameBg from "@/assets/game-bg.png";
 
 interface FloatingBubble {
@@ -135,6 +136,7 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => toast.info("Desafio diário em breve! 🗓️")}
           className="menu-neon-frame py-3 px-4 flex items-center justify-center gap-2.5"
         >
           <CalendarDays className="neon-icon-cyan" size={22} strokeWidth={2.2} />
@@ -144,15 +146,25 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
         {/* Linha 4: 4 botões circulares */}
         <div className="grid grid-cols-4 gap-3 mt-1">
           {[
-            { icon: ShoppingCart, label: "LOJA" },
-            { icon: Palette, label: "TEMAS" },
-            { icon: Gift, label: "PRÊMIOS" },
-            { icon: LogOut, label: "SAIR" },
-          ].map((item, i) => (
+            { icon: ShoppingCart, label: "LOJA", onClick: () => toast.info("Loja em breve! 🛒") },
+            { icon: Palette, label: "TEMAS", onClick: () => toast.info("Temas em breve! 🎨") },
+            { icon: Gift, label: "PRÊMIOS", onClick: () => toast.info("Prêmios em breve! 🎁") },
+            {
+              icon: LogOut,
+              label: "SAIR",
+              onClick: () => {
+                if (confirm("Deseja realmente sair do jogo?")) {
+                  window.close();
+                  setTimeout(() => toast.info("Feche a aba para sair 👋"), 100);
+                }
+              },
+            },
+          ].map((item) => (
             <motion.button
               key={item.label}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
+              onClick={item.onClick}
               className="flex flex-col items-center gap-1.5"
             >
               <div className="menu-neon-circle w-14 h-14 flex items-center justify-center">
