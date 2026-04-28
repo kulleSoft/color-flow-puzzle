@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
-import { Play, Grid3X3, Settings, Star, Droplets } from "lucide-react";
+import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, LogOut } from "lucide-react";
 import { getTotalStars, type Progress } from "@/lib/progress";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-/* Floating decorative bubbles */
 interface FloatingBubble {
   id: number;
   x: number;
@@ -15,12 +14,10 @@ interface FloatingBubble {
 }
 
 const BUBBLE_COLORS = [
-  "hsl(200, 80%, 55%)",   // primary blue
-  "hsl(260, 60%, 55%)",   // secondary purple
-  "hsl(145, 65%, 50%)",   // green
-  "hsl(0, 75%, 55%)",     // red
-  "hsl(45, 90%, 60%)",    // accent yellow
-  "hsl(320, 60%, 55%)",   // pink
+  "hsl(190, 100%, 60%)",
+  "hsl(320, 80%, 60%)",
+  "hsl(45, 100%, 60%)",
+  "hsl(275, 80%, 65%)",
 ];
 
 function generateBubbles(count: number): FloatingBubble[] {
@@ -28,41 +25,11 @@ function generateBubbles(count: number): FloatingBubble[] {
     id: i,
     x: Math.random() * 100,
     y: 60 + Math.random() * 40,
-    size: 8 + Math.random() * 24,
-    duration: 6 + Math.random() * 8,
+    size: 6 + Math.random() * 18,
+    duration: 7 + Math.random() * 7,
     delay: Math.random() * 5,
     color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
   }));
-}
-
-/* Mini decorative tube */
-function MiniTube({ colors, delay }: { colors: string[]; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 0.6, y: 0 }}
-      transition={{ delay, duration: 0.5 }}
-      className="flex flex-col-reverse overflow-hidden rounded-b-lg"
-      style={{
-        width: 20,
-        height: 64,
-        border: "1.5px solid hsl(var(--tube-glass-border) / 0.4)",
-        borderTop: "none",
-        background: "hsl(var(--tube-glass) / 0.1)",
-      }}
-    >
-      {colors.map((c, i) => (
-        <motion.div
-          key={i}
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
-          transition={{ delay: delay + i * 0.1 + 0.3, type: "spring", stiffness: 200 }}
-          className="w-full origin-bottom"
-          style={{ height: 16, backgroundColor: c, opacity: 0.8 }}
-        />
-      ))}
-    </motion.div>
-  );
 }
 
 interface MainMenuProps {
@@ -74,21 +41,11 @@ interface MainMenuProps {
 
 export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }: MainMenuProps) {
   const totalStars = getTotalStars(progress.stars);
-  const [bubbles] = useState(() => generateBubbles(14));
-
-  // Animated water drip on the logo
-  const [drip, setDrip] = useState(false);
-  useEffect(() => {
-    const iv = setInterval(() => {
-      setDrip(true);
-      setTimeout(() => setDrip(false), 800);
-    }, 3000);
-    return () => clearInterval(iv);
-  }, []);
+  const [bubbles] = useState(() => generateBubbles(12));
 
   return (
-    <div className="min-h-screen game-gradient-bg flex flex-col items-center justify-center p-4 select-none overflow-hidden relative">
-      {/* Floating bubbles background */}
+    <div className="min-h-screen menu-neon-bg flex flex-col items-center justify-center p-4 select-none overflow-hidden relative">
+      {/* Floating bubbles */}
       {bubbles.map((b) => (
         <motion.div
           key={b.id}
@@ -103,9 +60,9 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
           }}
           initial={{ opacity: 0, y: 0 }}
           animate={{
-            opacity: [0, 0.35, 0.35, 0],
-            y: [0, -200 - Math.random() * 300],
-            x: [0, (Math.random() - 0.5) * 60],
+            opacity: [0, 0.4, 0.4, 0],
+            y: [0, -220 - Math.random() * 260],
+            x: [0, (Math.random() - 0.5) * 50],
           }}
           transition={{
             duration: b.duration,
@@ -117,114 +74,85 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
       ))}
 
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        className="text-center relative z-10"
+        transition={{ type: "spring", stiffness: 180, damping: 20 }}
+        className="w-full max-w-md flex flex-col gap-4 relative z-10"
       >
-        {/* Logo with animated icon */}
-        <motion.div
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          transition={{ delay: 0.1, type: "spring" }}
-          className="mb-8"
-        >
-          <motion.div
-            className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-4 relative"
-            style={{
-              background: "linear-gradient(135deg, hsl(var(--primary) / 0.25), hsl(var(--secondary) / 0.25))",
-              boxShadow: "0 0 40px hsl(var(--primary) / 0.2), inset 0 1px 1px hsl(var(--tube-highlight) / 0.1)",
-              border: "1px solid hsl(var(--primary) / 0.2)",
-            }}
-            animate={{ rotate: [0, 2, -2, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Droplets className="text-primary" size={44} />
-            {/* Drip animation */}
-            {drip && (
-              <motion.div
-                initial={{ opacity: 0.8, y: 0, scale: 1 }}
-                animate={{ opacity: 0, y: 30, scale: 0.3 }}
-                transition={{ duration: 0.8, ease: "easeIn" }}
-                className="absolute -bottom-2 w-2 h-2 rounded-full bg-primary"
-              />
-            )}
-          </motion.div>
-
-          <h1 className="text-5xl sm:text-6xl font-bold text-foreground tracking-tight">
-            <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
-              Water Sort
-            </span>
-          </h1>
-          <p className="text-muted-foreground mt-2 text-lg tracking-widest uppercase">Puzzle Game</p>
-
-          {/* Decorative mini tubes */}
-          <div className="flex items-end justify-center gap-2 mt-5">
-            <MiniTube colors={["hsl(0,75%,55%)", "hsl(0,75%,55%)", "hsl(200,80%,55%)"]} delay={0.4} />
-            <MiniTube colors={["hsl(200,80%,55%)", "hsl(145,65%,50%)", "hsl(200,80%,55%)"]} delay={0.5} />
-            <MiniTube colors={["hsl(145,65%,50%)", "hsl(0,75%,55%)", "hsl(145,65%,50%)"]} delay={0.6} />
-            <MiniTube colors={[]} delay={0.7} />
+        {totalStars > 0 && (
+          <div className="flex justify-center mb-1">
+            <div className="menu-neon-circle px-4 py-1.5 flex items-center gap-2">
+              <span className="neon-text-cyan font-bold text-sm">⭐ {totalStars}</span>
+            </div>
           </div>
+        )}
 
-          {totalStars > 0 && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="flex items-center justify-center gap-2 mt-4"
-            >
-              <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-accent/15 border border-accent/20">
-                <Star size={16} className="fill-accent text-accent" />
-                <span className="font-bold text-accent">{totalStars}</span>
-              </div>
-            </motion.div>
-          )}
-        </motion.div>
+        {/* JOGAR - botão grande */}
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={onPlay}
+          className="menu-neon-frame-lg py-5 px-6 flex items-center justify-center gap-5"
+        >
+          <div className="menu-neon-circle w-14 h-14 flex items-center justify-center">
+            <Play className="neon-icon-cyan ml-0.5" size={28} strokeWidth={2.5} fill="currentColor" />
+          </div>
+          <span className="neon-text-cyan text-3xl font-bold tracking-wider">JOGAR</span>
+        </motion.button>
 
-        {/* Menu Buttons */}
-        <div className="flex flex-col gap-3 w-64 mx-auto">
+        {/* Linha 2: Conquistas + Configurações */}
+        <div className="grid grid-cols-2 gap-3">
           <motion.button
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
             whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onPlay}
-            className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl font-bold text-lg text-primary-foreground transition-all shadow-lg"
-            style={{
-              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
-              boxShadow: "0 8px 24px hsl(var(--primary) / 0.35)",
-            }}
-          >
-            <Play size={22} />
-            Jogar
-          </motion.button>
-
-          <motion.button
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.96 }}
             onClick={onLevelSelect}
-            className="flex items-center justify-center gap-3 w-full py-3.5 rounded-2xl bg-secondary/20 text-secondary-foreground font-semibold text-base border border-secondary/30 hover:bg-secondary/30 transition-all"
+            className="menu-neon-frame py-3 px-4 flex items-center justify-center gap-2.5"
           >
-            <Grid3X3 size={20} />
-            Níveis
+            <Trophy className="neon-icon-cyan" size={22} strokeWidth={2.2} />
+            <span className="neon-text-cyan text-sm font-bold tracking-wide">NÍVEIS</span>
           </motion.button>
 
           <motion.button
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
             whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.96 }}
             onClick={onSettings}
-            className="flex items-center justify-center gap-3 w-full py-3.5 rounded-2xl bg-muted/40 text-muted-foreground font-semibold text-base border border-border/50 hover:text-foreground hover:bg-muted/60 transition-all"
+            className="menu-neon-frame py-3 px-4 flex items-center justify-center gap-2.5"
           >
-            <Settings size={20} />
-            Configurações
+            <Settings className="neon-icon-cyan" size={22} strokeWidth={2.2} />
+            <span className="neon-text-cyan text-sm font-bold tracking-wide">CONFIG.</span>
           </motion.button>
+        </div>
+
+        {/* Linha 3: Diário (largura total) */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="menu-neon-frame py-3 px-4 flex items-center justify-center gap-2.5"
+        >
+          <CalendarDays className="neon-icon-cyan" size={22} strokeWidth={2.2} />
+          <span className="neon-text-cyan text-sm font-bold tracking-wide">DIÁRIO</span>
+        </motion.button>
+
+        {/* Linha 4: 4 botões circulares */}
+        <div className="grid grid-cols-4 gap-3 mt-1">
+          {[
+            { icon: ShoppingCart, label: "LOJA" },
+            { icon: Palette, label: "TEMAS" },
+            { icon: Gift, label: "PRÊMIOS" },
+            { icon: LogOut, label: "SAIR" },
+          ].map((item, i) => (
+            <motion.button
+              key={item.label}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              className="flex flex-col items-center gap-1.5"
+            >
+              <div className="menu-neon-circle w-14 h-14 flex items-center justify-center">
+                <item.icon className="neon-icon-cyan" size={24} strokeWidth={2.2} />
+              </div>
+              <span className="neon-text-cyan text-[10px] font-bold tracking-wider">{item.label}</span>
+            </motion.button>
+          ))}
         </div>
       </motion.div>
     </div>
