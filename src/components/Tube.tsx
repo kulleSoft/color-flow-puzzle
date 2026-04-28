@@ -48,7 +48,7 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
             bottom: `${INNER_BOTTOM_PCT}%`,
             left: `${INNER_LEFT_PCT}%`,
             right: `${INNER_RIGHT_PCT}%`,
-            borderRadius: "2px 2px 999px 999px / 2px 2px 60px 60px",
+            borderRadius: "0 0 999px 999px / 0 0 80% 80%",
           }}
         >
           {tube.map((color, i) => (
