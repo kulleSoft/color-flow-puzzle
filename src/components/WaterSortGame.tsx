@@ -150,7 +150,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
       {/* Game Area */}
       <div className="flex-1 flex items-center justify-center w-full max-w-2xl relative z-10">
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 px-2">
+        <div className="flex flex-wrap justify-center gap-x-0 gap-y-2 px-2">
           {tubes.map((tube, i) => (
             <Tube
               key={i}
