@@ -156,6 +156,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
               tube={tube}
               selected={selectedIdx === i}
               bubbling={bubblingIdx === i}
+              accentHsl={theme.accentHsl}
               onClick={() => handleTubeClick(i)}
             />
           ))}
