@@ -15,13 +15,15 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
   const topColor = tube.length > 0 ? tube[tube.length - 1] : "#fff";
   const SEG_H = 30;
 
-  // Inner liquid area — measured from the actual glass image (1024x1536).
-  // Glass outer: x 38.5%→61.8%, y 16.9%→85.9%. Inner walls ≈ 41%→59%.
-  // Liquid starts just below the rim opening (~20.5%) and ends at the rounded base (~84%).
+  // Inner liquid area — measured pixel-perfect from the glass image (1024x1536).
+  // Straight inner walls: x 40.3%→59.7% (until y≈79%). Rim opening: y≈20.5%.
+  // Base curve spans y 79%→85%; we use an elliptical clip to fit that curve.
   const INNER_TOP_PCT = 20.5;
-  const INNER_BOTTOM_PCT = 16; // 100 - 84
-  const INNER_LEFT_PCT = 41;
-  const INNER_RIGHT_PCT = 41; // 100 - 59
+  const INNER_BOTTOM_PCT = 15; // liquid bottom at 85% of image height
+  const INNER_LEFT_PCT = 40.3;
+  const INNER_RIGHT_PCT = 40.3; // 100 - 59.7
+  // Ellipse height at the base: 2 × (85% − 79%) = 12% of image height
+  const BASE_ELLIPSE_PCT = 12;
 
   // Match the image's native aspect ratio (1024/1536 ≈ 0.667) so inner %s stay accurate.
   // Sized so 4 segments of SEG_H fill the inner liquid area exactly.
@@ -48,7 +50,9 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
             bottom: `${INNER_BOTTOM_PCT}%`,
             left: `${INNER_LEFT_PCT}%`,
             right: `${INNER_RIGHT_PCT}%`,
-            borderRadius: "0 0 999px 999px / 0 0 80% 80%",
+            // Base elliptical curve: horizontal radius 50% of width, vertical radius ≈9.3% of container height
+            // (6% of image height / 64.5% container height). Top is straight (no radius).
+            borderRadius: "0 0 50% 50% / 0 0 9.3% 9.3%",
           }}
         >
           {tube.map((color, i) => (
