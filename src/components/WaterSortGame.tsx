@@ -214,15 +214,37 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
       {/* Bottom action buttons */}
       <div className="w-full max-w-lg flex items-center justify-around pb-4 pt-4 relative z-10">
-        <ActionButton icon={<Plus size={28} strokeWidth={3} />} label="TUBO EXTRA" badge={2} color="cyan" onClick={addExtraTube} />
-        <ActionButton icon={<Lightbulb size={28} strokeWidth={2.5} />} label="DICA" badge={1} color="yellow" onClick={() => {}} />
+        <ActionButton
+          icon={<Plus size={28} strokeWidth={3} />}
+          label="TUBO EXTRA"
+          badge={inventory.extraTube}
+          color="cyan"
+          onClick={addExtraTube}
+          disabled={inventory.extraTube <= 0}
+        />
+        <ActionButton
+          icon={<Lightbulb size={28} strokeWidth={2.5} />}
+          label="DICA"
+          badge={inventory.hint}
+          color="yellow"
+          onClick={useHint}
+          disabled={inventory.hint <= 0}
+        />
+        <ActionButton
+          icon={<SkipForward size={28} strokeWidth={2.5} />}
+          label="PULAR"
+          badge={inventory.skip}
+          color="yellow"
+          onClick={skipLevel}
+          disabled={inventory.skip <= 0}
+        />
         <ActionButton
           icon={<Undo2 size={28} strokeWidth={3} />}
           label="DESFAZER"
-          badge={2}
+          badge={inventory.undo}
           color="pink"
           onClick={undo}
-          disabled={history.length === 0}
+          disabled={history.length === 0 || inventory.undo <= 0}
         />
       </div>
 
