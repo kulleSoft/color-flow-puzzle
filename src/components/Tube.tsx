@@ -36,8 +36,15 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
       onClick={onClick}
       animate={{ y: selected ? -18 : 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="flex flex-col items-center focus:outline-none"
-      style={{ marginLeft: -tubeWidth * 0.22, marginRight: -tubeWidth * 0.22 }}
+      className="flex flex-col items-center focus:outline-none shrink-0"
+      style={{
+        // The glass PNG has ~15% transparent padding on each side; collapse most
+        // of it with negative margin so tubes don't look floaty, while keeping
+        // the glass width (tubeWidth) untouched. Remaining spacing is controlled
+        // by the responsive `gap-*` on the parent container.
+        marginLeft: -tubeWidth * 0.15,
+        marginRight: -tubeWidth * 0.15,
+      }}
     >
       <div
         className={`relative transition-all duration-200 ${selected ? "tube-selected-glow" : ""}`}
