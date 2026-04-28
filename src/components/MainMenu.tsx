@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, LogOut } from "lucide-react";
 import { getTotalStars, type Progress } from "@/lib/progress";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import gameBg from "@/assets/game-bg.png";
 
@@ -44,6 +45,7 @@ interface MainMenuProps {
 export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }: MainMenuProps) {
   const totalStars = getTotalStars(progress.stars);
   const [bubbles] = useState(() => generateBubbles(12));
+  const navigate = useNavigate();
 
   return (
     <div
@@ -136,7 +138,7 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => toast.info("Desafio diário em breve! 🗓️")}
+          onClick={() => navigate("/diario")}
           className="menu-neon-frame py-3 px-4 flex items-center justify-center gap-2.5"
         >
           <CalendarDays className="neon-icon-cyan" size={22} strokeWidth={2.2} />
@@ -146,9 +148,9 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
         {/* Linha 4: 4 botões circulares */}
         <div className="grid grid-cols-4 gap-3 mt-1">
           {[
-            { icon: ShoppingCart, label: "LOJA", onClick: () => toast.info("Loja em breve! 🛒") },
-            { icon: Palette, label: "TEMAS", onClick: () => toast.info("Temas em breve! 🎨") },
-            { icon: Gift, label: "PRÊMIOS", onClick: () => toast.info("Prêmios em breve! 🎁") },
+            { icon: ShoppingCart, label: "LOJA", onClick: () => navigate("/loja") },
+            { icon: Palette, label: "TEMAS", onClick: () => navigate("/temas") },
+            { icon: Gift, label: "PRÊMIOS", onClick: () => navigate("/premios") },
             {
               icon: LogOut,
               label: "SAIR",
