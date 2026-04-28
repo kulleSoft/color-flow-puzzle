@@ -282,7 +282,18 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
                   </motion.div>
                 ))}
               </div>
-              <p className="text-muted-foreground mb-6">{moves} movimentos</p>
+              <p className="text-muted-foreground mb-3">{moves} movimentos</p>
+              {coinsEarned > 0 && (
+                <motion.div
+                  initial={{ scale: 0, y: 10 }}
+                  animate={{ scale: 1, y: 0 }}
+                  transition={{ delay: 0.6, type: "spring", stiffness: 350 }}
+                  className="flex items-center justify-center gap-2 mb-5 px-3 py-2 rounded-xl bg-[hsl(45_100%_60%)]/15 border border-[hsl(45_100%_60%)]/40"
+                >
+                  <Coins className="text-[hsl(45_100%_60%)]" size={20} />
+                  <span className="text-[hsl(45_100%_70%)] font-bold">+{coinsEarned} moedas</span>
+                </motion.div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={onBackToMenu}
