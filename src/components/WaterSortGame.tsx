@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus } from "lucide-react";
+import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus, SkipForward, Coins } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import { getActiveTheme } from "@/lib/themes";
+import { addCoins, coinsForStars, consumeItem, loadInventory, type Inventory } from "@/lib/economy";
+import { toast } from "sonner";
 import Tube from "./Tube";
 
 interface WaterSortGameProps {
@@ -24,6 +26,8 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   const [won, setWon] = useState(false);
   const [moves, setMoves] = useState(0);
   const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
+  const [inventory, setInventory] = useState<Inventory>(() => loadInventory());
+  const [coinsEarned, setCoinsEarned] = useState(0);
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
@@ -32,6 +36,8 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     setHistory([]);
     setWon(false);
     setMoves(0);
+    setCoinsEarned(0);
+    setInventory(loadInventory());
     const next = { ...progress, currentLevel: lvl };
     saveProgress(next);
     onUpdateProgress(next);
@@ -43,6 +49,9 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
       if (soundEnabled) playWin();
       const earned = getStars(level, moves);
       const best = Math.max(progress.stars[level] || 0, earned);
+      const reward = coinsForStars(earned);
+      setCoinsEarned(reward);
+      if (reward > 0) addCoins(reward);
       const next = { ...progress, stars: { ...progress.stars, [level]: best } };
       saveProgress(next);
       onUpdateProgress(next);
@@ -77,6 +86,11 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
   const undo = () => {
     if (history.length === 0) return;
+    if (!consumeItem("undo")) {
+      toast.error("Sem desfazeres! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
     setTubes(history[history.length - 1]);
     setHistory((h) => h.slice(0, -1));
     setMoves((m) => m - 1);
@@ -84,8 +98,42 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   };
 
   const addExtraTube = () => {
+    if (!consumeItem("extraTube")) {
+      toast.error("Sem tubos extras! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
     setHistory((h) => [...h, tubes.map((t) => [...t])]);
     setTubes((t) => [...t, []]);
+  };
+
+  const useHint = () => {
+    if (!consumeItem("hint")) {
+      toast.error("Sem dicas! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
+    // Find a valid pour and highlight the source tube
+    for (let i = 0; i < tubes.length; i++) {
+      for (let j = 0; j < tubes.length; j++) {
+        if (i !== j && canPour(tubes[i], tubes[j])) {
+          setSelectedIdx(i);
+          toast.info(`💡 Tente mover do tubo ${i + 1} para o tubo ${j + 1}`);
+          return;
+        }
+      }
+    }
+    toast.warning("Nenhuma jogada disponível 😬");
+  };
+
+  const skipLevel = () => {
+    if (!consumeItem("skip")) {
+      toast.error("Sem pulos! Compre na loja 🛒");
+      return;
+    }
+    setInventory(loadInventory());
+    toast.success("Nível pulado ⏭️");
+    startLevel(level + 1);
   };
 
   const currentStars = getStars(level, moves);
@@ -166,15 +214,37 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
       {/* Bottom action buttons */}
       <div className="w-full max-w-lg flex items-center justify-around pb-4 pt-4 relative z-10">
-        <ActionButton icon={<Plus size={28} strokeWidth={3} />} label="TUBO EXTRA" badge={2} color="cyan" onClick={addExtraTube} />
-        <ActionButton icon={<Lightbulb size={28} strokeWidth={2.5} />} label="DICA" badge={1} color="yellow" onClick={() => {}} />
+        <ActionButton
+          icon={<Plus size={28} strokeWidth={3} />}
+          label="TUBO EXTRA"
+          badge={inventory.extraTube}
+          color="cyan"
+          onClick={addExtraTube}
+          disabled={inventory.extraTube <= 0}
+        />
+        <ActionButton
+          icon={<Lightbulb size={28} strokeWidth={2.5} />}
+          label="DICA"
+          badge={inventory.hint}
+          color="yellow"
+          onClick={useHint}
+          disabled={inventory.hint <= 0}
+        />
+        <ActionButton
+          icon={<SkipForward size={28} strokeWidth={2.5} />}
+          label="PULAR"
+          badge={inventory.skip}
+          color="yellow"
+          onClick={skipLevel}
+          disabled={inventory.skip <= 0}
+        />
         <ActionButton
           icon={<Undo2 size={28} strokeWidth={3} />}
           label="DESFAZER"
-          badge={2}
+          badge={inventory.undo}
           color="pink"
           onClick={undo}
-          disabled={history.length === 0}
+          disabled={history.length === 0 || inventory.undo <= 0}
         />
       </div>
 
@@ -212,7 +282,18 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
                   </motion.div>
                 ))}
               </div>
-              <p className="text-muted-foreground mb-6">{moves} movimentos</p>
+              <p className="text-muted-foreground mb-3">{moves} movimentos</p>
+              {coinsEarned > 0 && (
+                <motion.div
+                  initial={{ scale: 0, y: 10 }}
+                  animate={{ scale: 1, y: 0 }}
+                  transition={{ delay: 0.6, type: "spring", stiffness: 350 }}
+                  className="flex items-center justify-center gap-2 mb-5 px-3 py-2 rounded-xl bg-[hsl(45_100%_60%)]/15 border border-[hsl(45_100%_60%)]/40"
+                >
+                  <Coins className="text-[hsl(45_100%_60%)]" size={20} />
+                  <span className="text-[hsl(45_100%_70%)] font-bold">+{coinsEarned} moedas</span>
+                </motion.div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={onBackToMenu}
