@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus } from "lucide-react";
+import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus, SkipForward, Coins } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import { getActiveTheme } from "@/lib/themes";
+import { addCoins, coinsForStars, consumeItem, loadInventory, type Inventory } from "@/lib/economy";
+import { toast } from "sonner";
 import Tube from "./Tube";
 
 interface WaterSortGameProps {
@@ -24,6 +26,8 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   const [won, setWon] = useState(false);
   const [moves, setMoves] = useState(0);
   const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
+  const [inventory, setInventory] = useState<Inventory>(() => loadInventory());
+  const [coinsEarned, setCoinsEarned] = useState(0);
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
@@ -32,6 +36,8 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     setHistory([]);
     setWon(false);
     setMoves(0);
+    setCoinsEarned(0);
+    setInventory(loadInventory());
     const next = { ...progress, currentLevel: lvl };
     saveProgress(next);
     onUpdateProgress(next);
@@ -43,6 +49,9 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
       if (soundEnabled) playWin();
       const earned = getStars(level, moves);
       const best = Math.max(progress.stars[level] || 0, earned);
+      const reward = coinsForStars(earned);
+      setCoinsEarned(reward);
+      if (reward > 0) addCoins(reward);
       const next = { ...progress, stars: { ...progress.stars, [level]: best } };
       saveProgress(next);
       onUpdateProgress(next);
