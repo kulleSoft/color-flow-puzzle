@@ -16,8 +16,9 @@ interface WaterSortGameProps {
 }
 
 export default function WaterSortGame({ initialLevel, progress, soundEnabled, onUpdateProgress, onBackToMenu }: WaterSortGameProps) {
+  const theme = useMemo(() => getActiveTheme(), [initialLevel]);
   const [level, setLevel] = useState(initialLevel);
-  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(initialLevel));
+  const [tubes, setTubes] = useState<TubeType[]>(() => generateLevel(initialLevel, theme.palette));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [history, setHistory] = useState<TubeType[][]>([]);
   const [won, setWon] = useState(false);
@@ -26,7 +27,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
-    setTubes(generateLevel(lvl));
+    setTubes(generateLevel(lvl, theme.palette));
     setSelectedIdx(null);
     setHistory([]);
     setWon(false);
@@ -34,7 +35,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     const next = { ...progress, currentLevel: lvl };
     saveProgress(next);
     onUpdateProgress(next);
-  }, [progress, onUpdateProgress]);
+  }, [progress, onUpdateProgress, theme.palette]);
 
   useEffect(() => {
     if (tubes.length > 0 && isComplete(tubes) && !won) {
