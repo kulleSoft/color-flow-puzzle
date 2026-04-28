@@ -15,16 +15,19 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
   const topColor = tube.length > 0 ? tube[tube.length - 1] : "#fff";
   const SEG_H = 30;
 
-  // Inner liquid area sits inside the glass image.
-  // The image has some transparent padding around the tube; these percentages
-  // approximate the inner walls of the glass for the liquid mask.
-  const INNER_TOP_PCT = 16; // % from top where liquid can start
-  const INNER_BOTTOM_PCT = 6; // % from bottom (rounded base)
-  const INNER_LEFT_PCT = 26;
-  const INNER_RIGHT_PCT = 26;
+  // Inner liquid area — measured from the actual glass image (1024x1536).
+  // Glass outer: x 38.5%→61.8%, y 16.9%→85.9%. Inner walls ≈ 41%→59%.
+  // Liquid starts just below the rim opening (~20.5%) and ends at the rounded base (~84%).
+  const INNER_TOP_PCT = 20.5;
+  const INNER_BOTTOM_PCT = 16; // 100 - 84
+  const INNER_LEFT_PCT = 41;
+  const INNER_RIGHT_PCT = 41; // 100 - 59
 
-  const tubeHeight = TUBE_CAPACITY * SEG_H + 24;
-  const tubeWidth = Math.round(tubeHeight * 0.32);
+  // Match the image's native aspect ratio (1024/1536 ≈ 0.667) so inner %s stay accurate.
+  // Sized so 4 segments of SEG_H fill the inner liquid area exactly.
+  const innerPct = (100 - INNER_TOP_PCT - INNER_BOTTOM_PCT) / 100;
+  const tubeHeight = Math.round((TUBE_CAPACITY * SEG_H) / innerPct);
+  const tubeWidth = Math.round(tubeHeight * (1024 / 1536));
 
   return (
     <motion.button
@@ -45,7 +48,7 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
             bottom: `${INNER_BOTTOM_PCT}%`,
             left: `${INNER_LEFT_PCT}%`,
             right: `${INNER_RIGHT_PCT}%`,
-            borderRadius: "2px 2px 999px 999px / 2px 2px 60px 60px",
+            borderRadius: "0 0 999px 999px / 0 0 80% 80%",
           }}
         >
           {tube.map((color, i) => (
