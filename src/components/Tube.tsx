@@ -37,6 +37,7 @@ export default function Tube({ tube, selected, bubbling, onClick }: TubeProps) {
       animate={{ y: selected ? -18 : 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="flex flex-col items-center focus:outline-none"
+      style={{ marginLeft: -tubeWidth * 0.22, marginRight: -tubeWidth * 0.22 }}
     >
       <div
         className={`relative transition-all duration-200 ${selected ? "tube-selected-glow" : ""}`}
