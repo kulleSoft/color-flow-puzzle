@@ -7,11 +7,16 @@ const ctx = () => {
   return (window as any).__audioCtx as AudioContext;
 };
 
+let pourAudio: HTMLAudioElement | null = null;
 export function playPour() {
   try {
-    const audio = new Audio(pourSoundUrl);
-    audio.volume = 0.7;
-    audio.play().catch(() => {});
+    if (!pourAudio) {
+      pourAudio = new Audio(pourSoundUrl);
+      pourAudio.volume = 0.7;
+      pourAudio.preload = "auto";
+    }
+    pourAudio.currentTime = 0;
+    pourAudio.play().catch(() => {});
   } catch {}
 }
 
