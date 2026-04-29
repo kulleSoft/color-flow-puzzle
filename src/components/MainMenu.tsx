@@ -4,7 +4,7 @@ import { getTotalStars, type Progress } from "@/lib/progress";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import gameBg from "@/assets/game-bg.png";
+import gameBg from "@/assets/game-bg.jpg";
 
 interface FloatingBubble {
   id: number;

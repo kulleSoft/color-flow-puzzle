@@ -5,7 +5,7 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import { getActiveTheme } from "@/lib/themes";
-import gameBg from "@/assets/game-bg.png";
+import gameBg from "@/assets/game-bg.jpg";
 import { addCoins, coinsForStars, consumeItem, loadInventory, type Inventory } from "@/lib/economy";
 import { toast } from "sonner";
 import Tube from "./Tube";
