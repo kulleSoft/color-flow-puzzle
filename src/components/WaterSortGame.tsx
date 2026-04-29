@@ -143,7 +143,10 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     <div
       className="min-h-screen flex flex-col items-center p-4 select-none overflow-hidden relative"
       style={{
-        background: theme.background,
+        backgroundImage: `${theme.background}, url(${gameBg})`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
       }}
     >
       {/* Decorative palm-like silhouettes */}
