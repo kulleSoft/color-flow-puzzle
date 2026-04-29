@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Undo2, Trophy, Star, Home, Lightbulb, Plus, SkipForward, Coins } from "lucide-react";
 import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeType } from "@/lib/gameLogic";
@@ -29,6 +29,17 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
   const [inventory, setInventory] = useState<Inventory>(() => loadInventory());
   const [coinsEarned, setCoinsEarned] = useState(0);
+  const [pouring, setPouring] = useState<{
+    fromIdx: number;
+    toIdx: number;
+    color: string;
+    side: "left" | "right";
+    fromDx: number;
+    fromDy: number;
+    streamHeight: number;
+  } | null>(null);
+  const tubeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const POUR_DURATION = 0.75; // seconds
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
@@ -60,7 +71,7 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   }, [tubes, won, level, moves, soundEnabled, progress, onUpdateProgress]);
 
   const handleTubeClick = (idx: number) => {
-    if (won) return;
+    if (won || pouring) return;
     if (selectedIdx === null) {
       if (tubes[idx].length > 0) {
         setSelectedIdx(idx);
@@ -70,18 +81,54 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
       setSelectedIdx(null);
     } else {
       if (canPour(tubes[selectedIdx], tubes[idx])) {
-        setHistory((h) => [...h, tubes.map((t) => [...t])]);
-        const newTubes = tubes.map((t) => [...t]);
-        const [newFrom, newTo] = pour(newTubes[selectedIdx], newTubes[idx]);
-        newTubes[selectedIdx] = newFrom;
-        newTubes[idx] = newTo;
-        setTubes(newTubes);
-        setMoves((m) => m + 1);
-        setBubblingIdx(idx);
+        const fromIdx = selectedIdx;
+        const toIdx = idx;
+        const color = tubes[fromIdx][tubes[fromIdx].length - 1];
+
+        // Measure positions for the pouring animation
+        const fromEl = tubeRefs.current[fromIdx];
+        const toEl = tubeRefs.current[toIdx];
+        let side: "left" | "right" = "right";
+        let fromDx = 0;
+        let fromDy = 0;
+        let streamHeight = 120;
+        if (fromEl && toEl) {
+          const fromRect = fromEl.getBoundingClientRect();
+          const toRect = toEl.getBoundingClientRect();
+          const fromCenterX = fromRect.left + fromRect.width / 2;
+          const toCenterX = toRect.left + toRect.width / 2;
+          fromDx = toCenterX - fromCenterX;
+          // Vertical: lift the source so its mouth sits above destination's mouth
+          fromDy = toRect.top - fromRect.top;
+          side = fromDx >= 0 ? "right" : "left";
+          // Stream travels from source mouth (~18% down from top) to dest mouth
+          streamHeight = Math.max(80, Math.abs(fromDy) + fromRect.height * 0.25);
+        }
+
+        setSelectedIdx(null);
+        setPouring({ fromIdx, toIdx, color, side, fromDx, fromDy, streamHeight });
+        setBubblingIdx(toIdx);
         if (soundEnabled) playPour();
-        setTimeout(() => setBubblingIdx(null), 500);
+
+        const totalMs = POUR_DURATION * 1000;
+        // Commit the state change a bit before the stream fully fades, so it lines up
+        const commitDelay = totalMs * 0.55;
+        setTimeout(() => {
+          setHistory((h) => [...h, tubes.map((t) => [...t])]);
+          const newTubes = tubes.map((t) => [...t]);
+          const [newFrom, newTo] = pour(newTubes[fromIdx], newTubes[toIdx]);
+          newTubes[fromIdx] = newFrom;
+          newTubes[toIdx] = newTo;
+          setTubes(newTubes);
+          setMoves((m) => m + 1);
+        }, commitDelay);
+        setTimeout(() => {
+          setPouring(null);
+          setBubblingIdx(null);
+        }, totalMs);
+      } else {
+        setSelectedIdx(null);
       }
-      setSelectedIdx(null);
     }
   };
 
@@ -202,16 +249,34 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
       {/* Game Area */}
       <div className="flex-1 flex items-center justify-center w-full max-w-2xl relative z-10">
         <div className="flex flex-wrap justify-center gap-x-1 gap-y-3 sm:gap-x-2 md:gap-x-3 lg:gap-x-4 px-2">
-          {tubes.map((tube, i) => (
-            <Tube
-              key={i}
-              tube={tube}
-              selected={selectedIdx === i}
-              bubbling={bubblingIdx === i}
-              accentHsl={theme.accentHsl}
-              onClick={() => handleTubeClick(i)}
-            />
-          ))}
+          {tubes.map((tube, i) => {
+            const isFrom = pouring?.fromIdx === i;
+            const isTo = pouring?.toIdx === i;
+            const tubePour = pouring && (isFrom || isTo)
+              ? {
+                  role: (isFrom ? "from" : "to") as "from" | "to",
+                  color: pouring.color,
+                  dx: isFrom ? pouring.fromDx : -pouring.fromDx,
+                  dy: isFrom ? pouring.fromDy : -pouring.fromDy,
+                  side: pouring.side,
+                  streamHeight: pouring.streamHeight,
+                  duration: POUR_DURATION,
+                }
+              : null;
+            return (
+              <Tube
+                key={i}
+                ref={(el) => (tubeRefs.current[i] = el)}
+                tube={tube}
+                selected={selectedIdx === i}
+                bubbling={bubblingIdx === i}
+                accentHsl={theme.accentHsl}
+                onClick={() => handleTubeClick(i)}
+                pouring={tubePour}
+                hideTopSegment={isFrom}
+              />
+            );
+          })}
         </div>
       </div>
 
