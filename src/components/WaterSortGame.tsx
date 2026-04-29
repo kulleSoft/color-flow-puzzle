@@ -249,16 +249,34 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
       {/* Game Area */}
       <div className="flex-1 flex items-center justify-center w-full max-w-2xl relative z-10">
         <div className="flex flex-wrap justify-center gap-x-1 gap-y-3 sm:gap-x-2 md:gap-x-3 lg:gap-x-4 px-2">
-          {tubes.map((tube, i) => (
-            <Tube
-              key={i}
-              tube={tube}
-              selected={selectedIdx === i}
-              bubbling={bubblingIdx === i}
-              accentHsl={theme.accentHsl}
-              onClick={() => handleTubeClick(i)}
-            />
-          ))}
+          {tubes.map((tube, i) => {
+            const isFrom = pouring?.fromIdx === i;
+            const isTo = pouring?.toIdx === i;
+            const tubePour = pouring && (isFrom || isTo)
+              ? {
+                  role: (isFrom ? "from" : "to") as "from" | "to",
+                  color: pouring.color,
+                  dx: isFrom ? pouring.fromDx : -pouring.fromDx,
+                  dy: isFrom ? pouring.fromDy : -pouring.fromDy,
+                  side: pouring.side,
+                  streamHeight: pouring.streamHeight,
+                  duration: POUR_DURATION,
+                }
+              : null;
+            return (
+              <Tube
+                key={i}
+                ref={(el) => (tubeRefs.current[i] = el)}
+                tube={tube}
+                selected={selectedIdx === i}
+                bubbling={bubblingIdx === i}
+                accentHsl={theme.accentHsl}
+                onClick={() => handleTubeClick(i)}
+                pouring={tubePour}
+                hideTopSegment={isFrom}
+              />
+            );
+          })}
         </div>
       </div>
 
