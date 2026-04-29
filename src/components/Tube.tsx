@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { forwardRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { TUBE_CAPACITY, isTubeSorted, type Tube as TubeType } from "@/lib/gameLogic";
 import Bubbles from "./Bubbles";
 import tubeImg from "@/assets/tube.png";
@@ -9,49 +10,78 @@ interface TubeProps {
   bubbling: boolean;
   accentHsl?: string;
   onClick: () => void;
+  // Pour animation props
+  pouring?: {
+    role: "from" | "to";
+    color: string;
+    /** delta from THIS tube's center to the partner's mouth, in px */
+    dx: number;
+    dy: number;
+    /** which side to tilt toward (only for "from") */
+    side?: "left" | "right";
+    /** distance the stream needs to travel vertically (px) */
+    streamHeight?: number;
+    duration: number;
+  } | null;
+  /** Hide the top liquid segment (used on source while pouring) */
+  hideTopSegment?: boolean;
 }
 
-export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 65%", onClick }: TubeProps) {
+const Tube = forwardRef<HTMLButtonElement, TubeProps>(function Tube(
+  { tube, selected, bubbling, accentHsl = "190 100% 65%", onClick, pouring, hideTopSegment },
+  ref,
+) {
   const sorted = isTubeSorted(tube);
   const topColor = tube.length > 0 ? tube[tube.length - 1] : "#fff";
   const SEG_H = 30;
 
-  // Inner liquid area — measured pixel-perfect from the glass image (1024x1536).
-  // Straight inner walls: x 40.3%→59.7% (until y≈79%). Rim opening: y≈20.5%.
-  // Base curve spans y 79%→85%; we use an elliptical clip to fit that curve.
   const INNER_TOP_PCT = 20.5;
-  const INNER_BOTTOM_PCT = 15; // liquid bottom at 85% of image height
+  const INNER_BOTTOM_PCT = 15;
   const INNER_LEFT_PCT = 40.3;
-  const INNER_RIGHT_PCT = 40.3; // 100 - 59.7
-  // Ellipse height at the base: 2 × (85% − 79%) = 12% of image height
-  const BASE_ELLIPSE_PCT = 12;
+  const INNER_RIGHT_PCT = 40.3;
 
-  // Match the image's native aspect ratio (1024/1536 ≈ 0.667) so inner %s stay accurate.
-  // Sized so 4 segments of SEG_H fill the inner liquid area exactly.
   const innerPct = (100 - INNER_TOP_PCT - INNER_BOTTOM_PCT) / 100;
   const tubeHeight = Math.round((TUBE_CAPACITY * SEG_H) / innerPct);
   const tubeWidth = Math.round(tubeHeight * (1024 / 1536));
 
+  const isFrom = pouring?.role === "from";
+  const tiltDeg = isFrom ? (pouring?.side === "left" ? -65 : 65) : 0;
+  // Lift the source tube up & toward the destination so its mouth hovers over destination's mouth
+  const liftY = isFrom ? -Math.abs(pouring?.dy ?? 0) - 20 : 0;
+  const shiftX = isFrom ? (pouring?.dx ?? 0) * 0.5 : 0;
+
+  const visibleTube = hideTopSegment && tube.length > 0 ? tube.slice(0, -1) : tube;
+  const streamHeight = pouring?.streamHeight ?? 120;
+  const dur = pouring?.duration ?? 0.7;
+
   return (
     <motion.button
+      ref={ref}
       onClick={onClick}
-      animate={{ y: selected ? -18 : 0 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="flex flex-col items-center focus:outline-none shrink-0"
+      animate={{
+        y: isFrom ? liftY : selected ? -18 : 0,
+        x: shiftX,
+        rotate: tiltDeg,
+      }}
+      transition={
+        isFrom
+          ? { duration: dur * 0.35, ease: "easeOut" }
+          : { type: "spring", stiffness: 400, damping: 25 }
+      }
       style={{
-        // The glass PNG has ~15% transparent padding on each side; collapse most
-        // of it with negative margin so tubes don't look floaty, while keeping
-        // the glass width (tubeWidth) untouched. Remaining spacing is controlled
-        // by the responsive `gap-*` on the parent container.
         marginLeft: -tubeWidth * 0.15,
         marginRight: -tubeWidth * 0.15,
+        zIndex: isFrom ? 30 : 1,
+        transformOrigin:
+          pouring?.side === "left" ? "20% 80%" : "80% 80%",
       }}
+      className="flex flex-col items-center focus:outline-none shrink-0 relative"
     >
       <div
         className={`relative transition-all duration-200 ${selected ? "tube-selected-glow" : ""}`}
         style={{ width: tubeWidth, height: tubeHeight }}
       >
-        {/* Liquid container — clipped to inner tube shape */}
+        {/* Liquid container */}
         <div
           className="absolute overflow-hidden flex flex-col-reverse"
           style={{
@@ -59,12 +89,10 @@ export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 6
             bottom: `${INNER_BOTTOM_PCT}%`,
             left: `${INNER_LEFT_PCT}%`,
             right: `${INNER_RIGHT_PCT}%`,
-            // Base elliptical curve: horizontal radius 50% of width, vertical radius ≈9.3% of container height
-            // (6% of image height / 64.5% container height). Top is straight (no radius).
             borderRadius: "0 0 50% 50% / 0 0 9.3% 9.3%",
           }}
         >
-          {tube.map((color, i) => (
+          {visibleTube.map((color, i) => (
             <motion.div
               key={i}
               initial={{ scaleY: 0 }}
@@ -80,7 +108,7 @@ export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 6
           <Bubbles color={topColor} active={bubbling} />
         </div>
 
-        {/* Glass image overlay (on top of liquid for realistic refraction) */}
+        {/* Glass image overlay */}
         <img
           src={tubeImg}
           alt=""
@@ -94,7 +122,38 @@ export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 6
           }}
           draggable={false}
         />
+
+        {/* Pour stream — emits from the source tube's mouth (top center) */}
+        <AnimatePresence>
+          {isFrom && pouring && (
+            <motion.div
+              key="stream"
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: dur,
+                times: [0, 0.35, 0.75, 1],
+                ease: "easeOut",
+              }}
+              className="absolute pointer-events-none"
+              style={{
+                left: "50%",
+                top: "18%",
+                width: tubeWidth * 0.22,
+                height: streamHeight,
+                marginLeft: -(tubeWidth * 0.22) / 2,
+                transformOrigin: "top center",
+                background: `linear-gradient(180deg, ${pouring.color} 0%, ${pouring.color} 70%, color-mix(in srgb, ${pouring.color} 70%, black) 100%)`,
+                borderRadius: "40% 40% 30% 30% / 60% 60% 20% 20%",
+                boxShadow: `0 0 12px ${pouring.color}, inset 0 0 8px rgba(255,255,255,0.25)`,
+                filter: "blur(0.3px)",
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
+
       {/* Reflection */}
       <div
         className="h-2 mt-0.5 rounded-full opacity-40"
@@ -107,4 +166,6 @@ export default function Tube({ tube, selected, bubbling, accentHsl = "190 100% 6
       />
     </motion.button>
   );
-}
+});
+
+export default Tube;
