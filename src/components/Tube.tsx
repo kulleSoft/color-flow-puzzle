@@ -126,30 +126,85 @@ const Tube = forwardRef<HTMLButtonElement, TubeProps>(function Tube(
         {/* Pour stream — emits from the source tube's mouth (top center) */}
         <AnimatePresence>
           {isFrom && pouring && (
-            <motion.div
-              key="stream"
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={{ scaleY: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: dur,
-                times: [0, 0.35, 0.75, 1],
-                ease: "easeOut",
-              }}
-              className="absolute pointer-events-none"
-              style={{
-                left: "50%",
-                top: "18%",
-                width: tubeWidth * 0.22,
-                height: streamHeight,
-                marginLeft: -(tubeWidth * 0.22) / 2,
-                transformOrigin: "top center",
-                background: `linear-gradient(180deg, ${pouring.color} 0%, ${pouring.color} 70%, color-mix(in srgb, ${pouring.color} 70%, black) 100%)`,
-                borderRadius: "40% 40% 30% 30% / 60% 60% 20% 20%",
-                boxShadow: `0 0 12px ${pouring.color}, inset 0 0 8px rgba(255,255,255,0.25)`,
-                filter: "blur(0.3px)",
-              }}
-            />
+            <>
+              {/* Wet trail / residue clinging to the tube mouth */}
+              <motion.div
+                key="trail"
+                initial={{ scaleY: 0, opacity: 0 }}
+                animate={{ scaleY: [0, 1, 1, 0.6, 0], opacity: [0, 0.85, 0.9, 0.5, 0] }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: dur,
+                  times: [0, 0.25, 0.7, 0.9, 1],
+                  ease: "easeOut",
+                }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "12%",
+                  width: tubeWidth * 0.12,
+                  height: tubeWidth * 0.55,
+                  marginLeft: -(tubeWidth * 0.12) / 2,
+                  transformOrigin: "top center",
+                  background: `linear-gradient(180deg, ${pouring.color} 0%, ${pouring.color} 55%, color-mix(in srgb, ${pouring.color} 60%, transparent) 100%)`,
+                  borderRadius: "50% 50% 60% 60% / 30% 30% 90% 90%",
+                  boxShadow: `0 0 8px ${pouring.color}, inset 0 0 4px rgba(255,255,255,0.4)`,
+                  filter: "blur(0.4px)",
+                  zIndex: 2,
+                }}
+              />
+              {/* Falling droplet that detaches from the mouth */}
+              <motion.div
+                key="droplet"
+                initial={{ y: 0, opacity: 0, scale: 0.6 }}
+                animate={{
+                  y: [0, tubeWidth * 0.35, tubeWidth * 0.7],
+                  opacity: [0, 1, 0],
+                  scale: [0.6, 1, 0.8],
+                }}
+                transition={{
+                  duration: dur * 0.7,
+                  delay: dur * 0.55,
+                  ease: "easeIn",
+                }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "30%",
+                  width: tubeWidth * 0.14,
+                  height: tubeWidth * 0.18,
+                  marginLeft: -(tubeWidth * 0.14) / 2,
+                  background: `radial-gradient(ellipse at 35% 30%, color-mix(in srgb, ${pouring.color} 80%, white) 0%, ${pouring.color} 60%, color-mix(in srgb, ${pouring.color} 70%, black) 100%)`,
+                  borderRadius: "50% 50% 60% 60% / 40% 40% 80% 80%",
+                  boxShadow: `0 0 6px ${pouring.color}`,
+                  zIndex: 3,
+                }}
+              />
+              <motion.div
+                key="stream"
+                initial={{ scaleY: 0, opacity: 0 }}
+                animate={{ scaleY: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: dur,
+                  times: [0, 0.35, 0.75, 1],
+                  ease: "easeOut",
+                }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "18%",
+                  width: tubeWidth * 0.22,
+                  height: streamHeight,
+                  marginLeft: -(tubeWidth * 0.22) / 2,
+                  transformOrigin: "top center",
+                  background: `linear-gradient(180deg, ${pouring.color} 0%, ${pouring.color} 70%, color-mix(in srgb, ${pouring.color} 70%, black) 100%)`,
+                  borderRadius: "40% 40% 30% 30% / 60% 60% 20% 20%",
+                  boxShadow: `0 0 12px ${pouring.color}, inset 0 0 8px rgba(255,255,255,0.25)`,
+                  filter: "blur(0.3px)",
+                }}
+              />
+            </>
           )}
         </AnimatePresence>
       </div>
