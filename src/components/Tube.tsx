@@ -206,6 +206,70 @@ const Tube = forwardRef<HTMLButtonElement, TubeProps>(function Tube(
               />
             </>
           )}
+          {pouring?.role === "to" && (
+            <>
+              {/* Central splash burst */}
+              <motion.div
+                key="splash-burst"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.4, 1.8], opacity: [0, 0.9, 0] }}
+                transition={{
+                  duration: dur * 0.5,
+                  delay: dur * 0.55,
+                  ease: "easeOut",
+                }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "22%",
+                  width: tubeWidth * 0.35,
+                  height: tubeWidth * 0.18,
+                  marginLeft: -(tubeWidth * 0.35) / 2,
+                  background: `radial-gradient(ellipse at center, color-mix(in srgb, ${pouring.color} 80%, white) 0%, ${pouring.color} 50%, transparent 80%)`,
+                  borderRadius: "50%",
+                  boxShadow: `0 0 10px ${pouring.color}`,
+                  filter: "blur(0.5px)",
+                  zIndex: 4,
+                }}
+              />
+              {/* Splash droplets radiating outward and upward */}
+              {[
+                { x: -tubeWidth * 0.22, y: -tubeWidth * 0.18, s: 0.7 },
+                { x: -tubeWidth * 0.12, y: -tubeWidth * 0.28, s: 0.5 },
+                { x: tubeWidth * 0.12, y: -tubeWidth * 0.28, s: 0.5 },
+                { x: tubeWidth * 0.22, y: -tubeWidth * 0.18, s: 0.7 },
+                { x: 0, y: -tubeWidth * 0.32, s: 0.6 },
+              ].map((d, i) => (
+                <motion.div
+                  key={`splash-drop-${i}`}
+                  initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
+                  animate={{
+                    x: [0, d.x],
+                    y: [0, d.y, d.y + tubeWidth * 0.2],
+                    opacity: [0, 1, 0],
+                    scale: [0, d.s, d.s * 0.7],
+                  }}
+                  transition={{
+                    duration: dur * 0.55,
+                    delay: dur * 0.55 + i * 0.02,
+                    ease: "easeOut",
+                  }}
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: "50%",
+                    top: "22%",
+                    width: tubeWidth * 0.1,
+                    height: tubeWidth * 0.12,
+                    marginLeft: -(tubeWidth * 0.1) / 2,
+                    background: `radial-gradient(ellipse at 35% 30%, color-mix(in srgb, ${pouring.color} 80%, white) 0%, ${pouring.color} 70%, color-mix(in srgb, ${pouring.color} 70%, black) 100%)`,
+                    borderRadius: "50% 50% 60% 60% / 40% 40% 80% 80%",
+                    boxShadow: `0 0 4px ${pouring.color}`,
+                    zIndex: 4,
+                  }}
+                />
+              ))}
+            </>
+          )}
         </AnimatePresence>
       </div>
 
