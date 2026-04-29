@@ -5,6 +5,7 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import { getActiveTheme } from "@/lib/themes";
+import gameBg from "@/assets/game-bg.png";
 import { addCoins, coinsForStars, consumeItem, loadInventory, type Inventory } from "@/lib/economy";
 import { toast } from "sonner";
 import Tube from "./Tube";
@@ -142,7 +143,10 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
     <div
       className="min-h-screen flex flex-col items-center p-4 select-none overflow-hidden relative"
       style={{
-        background: theme.background,
+        backgroundImage: `${theme.background}, url(${gameBg})`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
       }}
     >
       {/* Decorative palm-like silhouettes */}
