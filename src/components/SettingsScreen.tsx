@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Volume2, VolumeX, Trash2, RotateCcw, Music2, Vibrate, Info } from "lucide-react";
 import { type Settings } from "@/lib/progress";
-import gameBg from "@/assets/game-bg.png";
+import gameBg from "@/assets/game-bg.jpg";
 
 interface SettingsScreenProps {
   settings: Settings;

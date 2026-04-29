@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import gameBg from "@/assets/game-bg.png";
+import gameBg from "@/assets/game-bg.jpg";
 
 interface PageShellProps {
   title: string;

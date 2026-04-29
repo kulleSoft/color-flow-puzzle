@@ -5,7 +5,7 @@ import { generateLevel, canPour, pour, isComplete, getStars, type Tube as TubeTy
 import { playPour, playSelect, playWin } from "@/lib/sounds";
 import { saveProgress, type Progress } from "@/lib/progress";
 import { getActiveTheme } from "@/lib/themes";
-import gameBg from "@/assets/game-bg.png";
+import gameBg from "@/assets/game-bg.jpg";
 import { addCoins, coinsForStars, consumeItem, loadInventory, type Inventory } from "@/lib/economy";
 import { toast } from "sonner";
 import Tube from "./Tube";
@@ -196,13 +196,14 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Decorative palm-like silhouettes */}
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute bottom-0 left-0 w-1/3 h-2/3"
-          style={{ background: "radial-gradient(ellipse at bottom left, hsl(280 60% 10% / 0.8), transparent 60%)" }} />
-        <div className="absolute bottom-0 right-0 w-1/3 h-2/3"
-          style={{ background: "radial-gradient(ellipse at bottom right, hsl(280 60% 10% / 0.8), transparent 60%)" }} />
-      </div>
+      {/* Decorative palm-like silhouettes (single layer, cheap) */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none opacity-30"
+        style={{
+          background:
+            "radial-gradient(ellipse at bottom left, hsl(280 60% 10% / 0.8), transparent 60%), radial-gradient(ellipse at bottom right, hsl(280 60% 10% / 0.8), transparent 60%)",
+        }}
+      />
 
       {/* Header */}
       <div className="w-full max-w-lg flex items-start justify-between pt-2 pb-4 relative z-10">
