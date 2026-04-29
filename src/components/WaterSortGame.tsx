@@ -29,6 +29,17 @@ export default function WaterSortGame({ initialLevel, progress, soundEnabled, on
   const [bubblingIdx, setBubblingIdx] = useState<number | null>(null);
   const [inventory, setInventory] = useState<Inventory>(() => loadInventory());
   const [coinsEarned, setCoinsEarned] = useState(0);
+  const [pouring, setPouring] = useState<{
+    fromIdx: number;
+    toIdx: number;
+    color: string;
+    side: "left" | "right";
+    fromDx: number;
+    fromDy: number;
+    streamHeight: number;
+  } | null>(null);
+  const tubeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const POUR_DURATION = 0.75; // seconds
 
   const startLevel = useCallback((lvl: number) => {
     setLevel(lvl);
