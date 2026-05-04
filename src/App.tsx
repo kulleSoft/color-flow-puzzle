@@ -10,6 +10,7 @@ import DailyGame from "./pages/DailyGame.tsx";
 import Shop from "./pages/Shop.tsx";
 import Themes from "./pages/Themes.tsx";
 import Rewards from "./pages/Rewards.tsx";
+import TermsDialog from "./components/TermsDialog.tsx";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <TermsDialog />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
