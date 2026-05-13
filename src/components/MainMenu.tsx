@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, LogOut } from "lucide-react";
+import { Play, Settings, Trophy, CalendarDays, ShoppingCart, Palette, Gift, Heart } from "lucide-react";
 import { getTotalStars, type Progress } from "@/lib/progress";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { AnimatePresence } from "framer-motion";
 import gameBg from "@/assets/game-bg.jpg";
 
 interface FloatingBubble {
