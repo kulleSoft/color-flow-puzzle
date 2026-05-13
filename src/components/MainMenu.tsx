@@ -158,14 +158,9 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
             { icon: Palette, label: "TEMAS", onClick: () => navigate("/temas") },
             { icon: Gift, label: "PRÊMIOS", onClick: () => navigate("/premios") },
             {
-              icon: LogOut,
-              label: "SAIR",
-              onClick: () => {
-                if (confirm("Deseja realmente sair do jogo?")) {
-                  window.close();
-                  setTimeout(() => toast.info("Feche a aba para sair 👋"), 100);
-                }
-              },
+              icon: Heart,
+              label: "APOIO",
+              onClick: () => setShowSupport(true),
             },
           ].map((item) => (
             <motion.button
