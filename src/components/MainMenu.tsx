@@ -46,6 +46,12 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
   const totalStars = getTotalStars(progress.stars);
   const [bubbles] = useState(() => generateBubbles(12));
   const navigate = useNavigate();
+  const [showSupport, setShowSupport] = useState(false);
+
+  const handleWatchAd = () => {
+    console.log("ads chamado");
+    setShowSupport(false);
+  };
 
   return (
     <div
