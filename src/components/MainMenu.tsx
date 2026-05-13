@@ -178,6 +178,53 @@ export default function MainMenu({ progress, onPlay, onLevelSelect, onSettings }
           ))}
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showSupport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowSupport(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 220, damping: 22 }}
+              onClick={(e) => e.stopPropagation()}
+              className="menu-neon-frame-lg w-full max-w-sm p-6 flex flex-col gap-4"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Heart className="neon-icon-cyan" size={24} fill="currentColor" />
+                <h2 className="neon-text-cyan text-xl font-bold tracking-wider">APOIE O PROJETO</h2>
+              </div>
+              <p className="text-sm text-foreground/90 text-center leading-relaxed">
+                Deseja assistir um anúncio para ajudar o desenvolvimento do jogo?
+              </p>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setShowSupport(false)}
+                  className="menu-neon-frame py-2.5 px-3"
+                >
+                  <span className="neon-text-cyan text-sm font-bold tracking-wider">AGORA NÃO</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleWatchAd}
+                  className="menu-neon-frame py-2.5 px-3"
+                >
+                  <span className="neon-text-cyan text-sm font-bold tracking-wider">ASSISTIR</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
